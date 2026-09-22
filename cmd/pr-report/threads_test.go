@@ -54,3 +54,60 @@ func TestThreadSkipIndependentCursorsAndTemporalCounts(t *testing.T) {
 		t.Fatal(n, e)
 	}
 }
+
+func TestThreadFailurePreservesPRWithoutSubtotal(t *testing.T) {
+	for _, bad := range []processResult{
+		{Stdout: []byte(`{"data":{"repository":{"pullRequest":null}}}`)},
+		{Stdout: []byte(`{"data":{"repository":null},"errors":[{"type":"NOT_FOUND"}]}`)},
+		{Stdout: []byte(`{"data":{"repository":{"pullRequest":{"reviewThreads":{"nodes":[],"pageInfo":{"hasNextPage":false}}}}}},"errors":[{"message":"partial"}]}`)},
+		threadFixture([]any{threadNode("new", false)}, true, "a"),
+		threadFixture([]any{threadNode("new", false)}, true, nil),
+		threadFixture([]any{map[string]any{"id": "bad"}}, false, nil),
+	} {
+		p := prFixture(1)
+		p["reviewThreads"] = map[string]any{"totalCount": 3}
+		f := &fakeExecutor{replies: []processResult{listFixture([]any{p}, false, nil), threadFixture([]any{threadNode("first", false)}, true, "a"), bad}}
+		r := newClient(f).collect(context.Background(), config{repos: []string{"org/repo"}})
+		if len(r.PullRequests) != 1 || r.PullRequests[0].UnresolvedThreadsCount != nil || r.PullRequests[0].DetailsComplete || r.Complete || !r.Repositories[0].ListingComplete || r.Repositories[0].DetailsComplete || len(r.Errors) != 1 {
+			t.Fatalf("%+v", r)
+		}
+		pOut := r.PullRequests[0]
+		if *pOut.ReviewThreadsCount != 3 || pOut.Title != "Title" || *pOut.Mergeable != "MERGEABLE" {
+			t.Fatal(pOut)
+		}
+		e := r.Errors[0]
+		if e.Stage != "review_threads" || *e.Repo != "Org/Repo" || *e.PRNumber != 1 {
+			t.Fatal(e)
+		}
+	}
+}
+func TestThreadRequiredFields(t *testing.T) {
+	for _, key := range []string{"id", "isResolved"} {
+		for _, null := range []bool{false, true} {
+			node := threadNode("x", false)
+			if null {
+				node[key] = nil
+			} else {
+				delete(node, key)
+			}
+			if _, e := decodeThreads(threadFixture([]any{node}, false, nil)); e == nil {
+				t.Fatal(key, null)
+			}
+		}
+	}
+	for _, raw := range []string{`{}`, `{"errors":null}`, `{"errors":{}}`, `{"data":{"repository":{}}}`} {
+		if _, e := decodeThreads(processResult{Stdout: []byte(raw)}); e == nil {
+			t.Fatal(raw)
+		}
+	}
+	good := threadFixture([]any{}, false, nil)
+	good.ExitCode = 1
+	if _, e := decodeThreads(good); e == nil {
+		t.Fatal("failed process accepted")
+	}
+	for _, node := range []any{nil, map[string]any{"id": "", "isResolved": false}, map[string]any{"id": "x", "isResolved": "false"}} {
+		if _, e := decodeThreads(threadFixture([]any{node}, false, nil)); e == nil {
+			t.Fatal(node)
+		}
+	}
+}
