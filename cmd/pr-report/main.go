@@ -52,10 +52,7 @@ func executeReport(cfg config, stdout, stderr io.Writer) int {
 	return runReport(context.Background(), cfg, stdout, stderr, newClient(executor))
 }
 func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *client) int {
-	if cfg.format != "json" {
-		fmt.Fprintln(stderr, "pr-report: table rendering is not implemented yet; use --format json")
-		return 1
-	}
+
 	r := c.collect(ctx, cfg)
 	if ctx.Err() != nil {
 		return 130
@@ -73,7 +70,11 @@ func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *cli
 			fmt.Fprintf(stderr, "pr-report: %q PR %s %s (%s): %q\n", repo, number, d.Stage, d.Code, d.Message)
 		}
 	}
-	if err := writeJSON(stdout, r); err != nil {
+	render := writeTable
+	if cfg.format == "json" {
+		render = writeJSON
+	}
+	if err := render(stdout, r); err != nil {
 		fmt.Fprintf(stderr, "pr-report: write output: %v\n", err)
 		return 1
 	}

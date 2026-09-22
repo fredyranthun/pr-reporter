@@ -96,7 +96,9 @@ Depends on reliable PR listing. Keep normalization separate from collection and 
 
 Depends on the report model and collection behavior above.
 
-- [ ] **T20 — Render the terminal table.** Use `text/tabwriter`, no colors, and the exact columns from §9. Display only general comments under `COMENT.`, preserve the raw merge state, render blockage as `sim`/`não`/`?`, and show `?` for unavailable fields. Test representative complete and nullable rows. References: §9.
+- [x] **T20 — Render the terminal table.** Use `text/tabwriter`, no colors, and the exact columns from §9. Display only general comments under `COMENT.`, preserve the raw merge state, render blockage as `sim`/`não`/`?`, and show `?` for unavailable fields. Test representative complete and nullable rows. References: §9.
+
+  Completed 2026-09-22: Added default terminal rendering with text/tabwriter and the exact specified columns. Tests verify general-comment counts, raw merge state, Portuguese blocked labels, nullable cells, and color-free output. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T21 — Sanitize terminal fields and truncate titles.** Remove terminal escape/control sequences, tabs, and newlines from every API-derived table field. If truncating titles, use the spec's 60-rune limit with an ellipsis and avoid splitting UTF-8. Preserve original values in JSON. Test escape sequences, line breaks, multibyte titles, and JSON escaping. References: §§9, 11.
 
