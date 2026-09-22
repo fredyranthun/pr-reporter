@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-22T12:00:00Z",
+  "finished_at": "2026-09-22T12:00:00Z",
+  "complete": true,
+  "filters": {
+    "only_unresolved": true
+  },
+  "repositories": [
+    {
+      "requested_repo": "ORG/repo",
+      "repo": "Org/Repo",
+      "listing_complete": true,
+      "details_complete": true,
+      "prs_collected": 1
+    }
+  ],
+  "prs_collected": 1,
+  "prs_returned": 0,
+  "pull_requests": [],
+  "errors": [],
+  "warnings": []
+}

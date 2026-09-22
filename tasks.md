@@ -88,7 +88,9 @@ Depends on reliable PR listing. Keep normalization separate from collection and 
 
   Completed 2026-09-22: Added stable case-insensitive repository/number sorting and post-collection unresolved filtering. Tests verify known positive counts only, all-filtered output, preserved errors/completeness, and separate collected/returned counters. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T19 — Complete and lock down JSON output.** Render exactly one object with two-space indentation and the full §9 contract, including timestamps, repository outcomes, counters, PRs, errors, and warnings. Preserve full titles, original enum values, explicit nulls, and empty arrays; send every operational diagnostic to stderr. Test complete, empty, filtered, and incomplete reports against fixtures and verify stdout parses as one JSON value with no trailing diagnostics. References: §§4, 9, 11.
+- [x] **T19 — Complete and lock down JSON output.** Render exactly one object with two-space indentation and the full §9 contract, including timestamps, repository outcomes, counters, PRs, errors, and warnings. Preserve full titles, original enum values, explicit nulls, and empty arrays; send every operational diagnostic to stderr. Test complete, empty, filtered, and incomplete reports against fixtures and verify stdout parses as one JSON value with no trailing diagnostics. References: §§4, 9, 11.
+
+  Completed 2026-09-22: Locked schema 1 JSON output with reviewed golden fixtures for complete, empty, filtered, incomplete, and unfamiliar-enum reports. Tests enforce two-space indentation, one JSON value, full escaped titles, explicit nulls/arrays, raw enums, and stderr-only operational diagnostics. Verified offline `go test ./...`, formatting, and command build.
 
 ## Phase 4 — Table output and operational behavior (7 tasks)
 

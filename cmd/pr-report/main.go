@@ -60,8 +60,18 @@ func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *cli
 	if ctx.Err() != nil {
 		return 130
 	}
-	for _, d := range r.Errors {
-		fmt.Fprintf(stderr, "pr-report: %s (%s): %q\n", d.Stage, d.Code, d.Message)
+	for _, entries := range []list[diagnostic]{r.Errors, r.Warnings} {
+		for _, d := range entries {
+			repo := "?"
+			if d.Repo != nil {
+				repo = *d.Repo
+			}
+			number := "?"
+			if d.PRNumber != nil {
+				number = fmt.Sprint(*d.PRNumber)
+			}
+			fmt.Fprintf(stderr, "pr-report: %q PR %s %s (%s): %q\n", repo, number, d.Stage, d.Code, d.Message)
+		}
 	}
 	if err := writeJSON(stdout, r); err != nil {
 		fmt.Fprintf(stderr, "pr-report: write output: %v\n", err)
