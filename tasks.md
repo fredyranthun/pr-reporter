@@ -100,7 +100,9 @@ Depends on the report model and collection behavior above.
 
   Completed 2026-09-22: Added default terminal rendering with text/tabwriter and the exact specified columns. Tests verify general-comment counts, raw merge state, Portuguese blocked labels, nullable cells, and color-free output. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T21 — Sanitize terminal fields and truncate titles.** Remove terminal escape/control sequences, tabs, and newlines from every API-derived table field. If truncating titles, use the spec's 60-rune limit with an ellipsis and avoid splitting UTF-8. Preserve original values in JSON. Test escape sequences, line breaks, multibyte titles, and JSON escaping. References: §§9, 11.
+- [x] **T21 — Sanitize terminal fields and truncate titles.** Remove terminal escape/control sequences, tabs, and newlines from every API-derived table field. If truncating titles, use the spec's 60-rune limit with an ellipsis and avoid splitting UTF-8. Preserve original values in JSON. Test escape sequences, line breaks, multibyte titles, and JSON escaping. References: §§9, 11.
+
+  Completed 2026-09-22: Sanitized all API-derived table cells, including ANSI control strings, tabs/newlines, and format controls; titles use a 60-rune inclusive ellipsis limit. Tests cover CSI/OSC/C1 sequences, Unicode boundaries, every displayed string field, and unchanged escaped JSON. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T22 — Add table summaries and empty-result messages.** Show complete/incomplete repository totals and PRs collected/displayed. Distinguish no open PRs, no filter matches, and no recovered PRs with incomplete collection. Ensure partial reports remain visibly incomplete even when filtering hides affected records. Verify table output and stderr diagnostics independently. References: §§8, 9, 11.
 

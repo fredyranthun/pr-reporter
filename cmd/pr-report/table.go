@@ -26,7 +26,7 @@ func writeTable(w io.Writer, r report) error {
 	var b strings.Builder
 	b.WriteString("REPO\tPR\tTÍTULO\tCOMENT.\tTHREADS PEND.\tREVISÃO\tMERGE\tBLOQUEADO\tURL\n")
 	for _, p := range r.PullRequests {
-		fmt.Fprintf(&b, "%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", p.Repo, p.Number, p.Title, display(p.ConversationCommentsCount), display(p.UnresolvedThreadsCount), display(p.ReviewDecision), display(p.MergeStateStatus), displayBlocked(p.Blocked), p.URL)
+		fmt.Fprintf(&b, "%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", terminalText(p.Repo), p.Number, tableTitle(p.Title), display(p.ConversationCommentsCount), display(p.UnresolvedThreadsCount), terminalText(display(p.ReviewDecision)), terminalText(display(p.MergeStateStatus)), displayBlocked(p.Blocked), terminalText(p.URL))
 	}
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 	if _, e := io.WriteString(tw, b.String()); e != nil {
