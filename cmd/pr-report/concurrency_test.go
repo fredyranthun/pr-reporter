@@ -57,3 +57,92 @@ func TestConcurrentCollectionStableOutput(t *testing.T) {
 		t.Fatal("repository order changed")
 	}
 }
+
+func TestConcurrencyBoundsRetriesAndThreads(t *testing.T) {
+	for _, limit := range []int{1, 3, 8} {
+		t.Run(fmt.Sprint(limit), func(t *testing.T) {
+			var mu sync.Mutex
+			active, peak := 0, 0
+			attempts := map[string]int{}
+			f := &fakeExecutor{handle: func(ctx context.Context, args []string) processResult {
+				mu.Lock()
+				active++
+				if active > peak {
+					peak = active
+				}
+				key := argument(args, "name") + argument(args, "number")
+				attempts[key]++
+				nth := attempts[key]
+				mu.Unlock()
+				defer func() { mu.Lock(); active--; mu.Unlock() }()
+				if err := waitContext(ctx, 3*time.Millisecond); err != nil {
+					return processResult{Err: err, ExitCode: -1}
+				}
+				if nth == 1 {
+					return processResult{Err: context.DeadlineExceeded, ExitCode: -1}
+				}
+				if argument(args, "query") == threadQuery {
+					return threadFixture([]any{threadNode("pending", false)}, false, nil)
+				}
+				p := prFixture(1)
+				p["reviewThreads"] = map[string]any{"totalCount": 1}
+				r := listFixture([]any{p}, false, nil)
+				r.Stdout = []byte(strings.ReplaceAll(string(r.Stdout), "Org/Repo", "Org/"+argument(args, "name")))
+				return r
+			}}
+			c := newClient(f)
+			c.wait = func(ctx context.Context, _ time.Duration) error { return ctx.Err() }
+			c.jitter = func() time.Duration { return 0 }
+			started := time.Now()
+			repos := []string{}
+			for i := 0; i < 9; i++ {
+				repos = append(repos, fmt.Sprintf("org/repo%d", i))
+			}
+			r := c.collect(context.Background(), config{repos: repos, concurrency: limit})
+			duration := time.Since(started)
+			t.Logf("concurrency=%d, 9 repositories, 9 thread queries: %s", limit, duration)
+			if !r.Complete || r.PRsCollected != 9 || len(r.Errors) != 0 || len(f.calls) != 36 || peak > limit || active != 0 {
+				t.Fatal(peak, active, len(f.calls), r)
+			}
+			if limit == 1 && peak != 1 || limit > 1 && peak < 2 {
+				t.Fatal("limit unused", peak)
+			}
+		})
+	}
+}
+func TestConcurrentPartialFailureAndCancellation(t *testing.T) {
+	f := &fakeExecutor{handle: func(ctx context.Context, args []string) processResult {
+		if argument(args, "name") == "bad" {
+			return processResult{Stdout: []byte(`{"data":{"repository":null}}`)}
+		}
+		r := listFixture([]any{prFixture(1)}, false, nil)
+		r.Stdout = []byte(strings.ReplaceAll(string(r.Stdout), "Org/Repo", "Org/"+argument(args, "name")))
+		return r
+	}}
+	r := newClient(f).collect(context.Background(), config{repos: []string{"org/good", "org/bad", "org/other"}, concurrency: 3})
+	if r.Complete || len(r.Errors) != 1 || r.PRsCollected != 2 || len(r.Repositories) != 3 || r.Repositories[1].Repo != nil {
+		t.Fatal(r)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	started := make(chan struct{})
+	var once sync.Once
+	f = &fakeExecutor{handle: func(ctx context.Context, _ []string) processResult {
+		once.Do(func() { close(started) })
+		<-ctx.Done()
+		return processResult{Err: ctx.Err(), ExitCode: -1}
+	}}
+	done := make(chan report, 1)
+	go func() {
+		done <- newClient(f).collect(ctx, config{repos: []string{"org/a", "org/b", "org/c", "org/d"}, concurrency: 3})
+	}()
+	<-started
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("cancellation deadlocked")
+	}
+	if len(f.calls) > 3 {
+		t.Fatal("started queued work after cancel", len(f.calls))
+	}
+}
