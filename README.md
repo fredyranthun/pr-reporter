@@ -21,13 +21,13 @@ go build -o pr-report ./cmd/pr-report
 # Alternativa: go install ./cmd/pr-report
 ```
 
-Após o primeiro release, a instalação por versão publicada será:
+Para instalar a versão publicada:
 
 ```sh
 go install github.com/fredyranthun/pr-reporter/cmd/pr-report@latest
 ```
 
-`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O binário de release Linux/amd64 e as instruções de verificação ficarão na página de releases.
+`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.0](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.0) inclui o binário Linux/amd64, SHA-256 e instruções de verificação.
 
 ## Primeiro relatório
 
