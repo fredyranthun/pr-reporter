@@ -32,7 +32,9 @@ The executable is `pr-report`, the command lives in `cmd/pr-report` with `packag
 
 Depends on the foundation; deliver paginated collection and basic JSON before adding thread details.
 
-- [ ] **T06 — Build the subprocess executor and test double.** Locate `gh` after input validation and invoke it through a small interface backed by `exec.CommandContext`, with separate arguments and no shell. Fix the host to `github.com`, preserve the authentication environment, and capture stdout, stderr, and process outcome separately. Never start login, extract tokens, or log credentials. Provide a fake executor with queued responses, invocation tracking, and cancellation support so tests need no network or token. References: §§3, 7, 10.
+- [x] **T06 — Build the subprocess executor and test double.** Locate `gh` after input validation and invoke it through a small interface backed by `exec.CommandContext`, with separate arguments and no shell. Fix the host to `github.com`, preserve the authentication environment, and capture stdout, stderr, and process outcome separately. Never start login, extract tokens, or log credentials. Provide a fake executor with queued responses, invocation tracking, and cancellation support so tests need no network or token. References: §§3, 7, 10.
+
+  Completed 2026-09-22: Added a shell-free CommandContext executor fixed to github.com, with separate streams and process status. Offline helper-process tests verify literal arguments, inherited environment, missing gh, and cancellation; a queued fake records calls. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T07 — Define the PR-list GraphQL query.** Use constant query text with separately passed variables for owner, name, page size, and cursor. Request open PRs including drafts, creation order ascending, pages of up to 100, canonical repository name, IDs, main PR fields, `comments.totalCount`, `reviewThreads.totalCount`, and page information. Fetch no comment/review bodies or large nested connections. Validate query arguments with executor fixtures. References: §§4, 5, 7.
 
