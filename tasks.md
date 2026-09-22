@@ -60,7 +60,9 @@ Depends on the foundation; deliver paginated collection and basic JSON before ad
 
 Depends on reliable PR listing. Keep normalization separate from collection and test it as pure logic.
 
-- [ ] **T12 — Query and paginate review threads.** Add a constant thread query with independent cursor state per PR, pages up to 100, thread IDs, and `isResolved`. Skip enumeration when the known thread count is zero. Deduplicate IDs and count all unresolved threads, including outdated ones; fetch no bodies. Test 130 threads across two pages, resolved/outdated threads, duplicates, and independent cursors across PRs. References: §§5, 7, 11.
+- [x] **T12 — Query and paginate review threads.** Add a constant thread query with independent cursor state per PR, pages up to 100, thread IDs, and `isResolved`. Skip enumeration when the known thread count is zero. Deduplicate IDs and count all unresolved threads, including outdated ones; fetch no bodies. Test 130 threads across two pages, resolved/outdated threads, duplicates, and independent cursors across PRs. References: §§5, 7, 11.
+
+  Completed 2026-09-22: Added independent thread pagination, first-ID deduplication, and zero-total skipping without fetching bodies. Tests cover 130 threads, outdated unresolved entries, duplicate resolution changes, independent PR cursors, unknown totals, and non-atomic count differences. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T13 — Preserve PRs when detail collection fails.** Apply response and cursor validation to thread pages. If enumeration fails, retain the PR, set `unresolved_threads_count` to null, mark its details incomplete, and attach a `review_threads` error with repository/PR context. Preserve independently known fields and never expose a partial unresolved subtotal as final. Test failure after a valid first page and a PR that becomes unavailable between requests. References: §§5, 7–9, 11.
 

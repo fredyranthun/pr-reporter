@@ -25,3 +25,14 @@ func queryArgs(query, repo, cursor string) []string {
 	}
 	return args
 }
+
+const threadQuery = `query($owner: String!, $name: String!, $number: Int!, $pageSize: Int!, $cursor: String) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      reviewThreads(first: $pageSize, after: $cursor) {
+        nodes { id isResolved }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+  }
+}`

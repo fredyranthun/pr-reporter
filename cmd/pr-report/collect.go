@@ -12,6 +12,11 @@ func (c *client) collect(ctx context.Context, cfg config) report {
 			break
 		}
 		repo, prs, errs := c.listPRs(ctx, requested)
+		errs = append(errs, c.collectDetails(ctx, prs)...)
+		repo.DetailsComplete = true
+		for _, p := range prs {
+			repo.DetailsComplete = repo.DetailsComplete && p.public.DetailsComplete
+		}
 		r.Repositories = append(r.Repositories, repo)
 		r.Errors = append(r.Errors, errs...)
 		r.Complete = r.Complete && repo.ListingComplete && repo.DetailsComplete
