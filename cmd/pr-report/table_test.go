@@ -62,7 +62,7 @@ func TestTerminalSanitization(t *testing.T) {
 	if e := writeTable(&out, r); e != nil {
 		t.Fatal(e)
 	}
-	if strings.ContainsAny(out.String(), "\x1b\t") || strings.Count(out.String(), "VALUE") != 5 || strings.Count(out.String(), "\n") != 2 {
+	if strings.ContainsAny(out.String(), "\x1b\t") || strings.Count(out.String(), "VALUE") != 5 || strings.Count(out.String(), "\n") != 3 {
 		t.Fatal(out.String())
 	}
 	out.Reset()
@@ -71,5 +71,29 @@ func TestTerminalSanitization(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), `\u001b[31mVALUE\u001b[0m\t\n`) {
 		t.Fatal("JSON altered", out.String())
+	}
+}
+
+func TestTableEmptyMessagesAndSummaries(t *testing.T) {
+	for _, tc := range []struct {
+		complete  bool
+		collected int
+		message   string
+	}{{true, 0, "Nenhum PR aberto."}, {true, 2, "Nenhum PR atende ao filtro."}, {false, 0, "Nenhum PR recuperado; consulta incompleta."}, {false, 2, "Nenhum PR atende ao filtro."}} {
+		r := report{Complete: tc.complete, PRsCollected: tc.collected, Repositories: list[repositoryResult]{{ListingComplete: tc.complete, DetailsComplete: true}}}
+		var b bytes.Buffer
+		if e := writeTable(&b, r); e != nil {
+			t.Fatal(e)
+		}
+		if !strings.Contains(b.String(), tc.message) || !strings.Contains(b.String(), "0 exibidos") {
+			t.Fatal(b.String())
+		}
+		summary := "1 completos, 0 incompletos"
+		if !tc.complete {
+			summary = "0 completos, 1 incompletos"
+		}
+		if !strings.Contains(b.String(), summary) {
+			t.Fatal(b.String())
+		}
 	}
 }

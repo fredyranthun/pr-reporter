@@ -104,7 +104,9 @@ Depends on the report model and collection behavior above.
 
   Completed 2026-09-22: Sanitized all API-derived table cells, including ANSI control strings, tabs/newlines, and format controls; titles use a 60-rune inclusive ellipsis limit. Tests cover CSI/OSC/C1 sequences, Unicode boundaries, every displayed string field, and unchanged escaped JSON. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T22 — Add table summaries and empty-result messages.** Show complete/incomplete repository totals and PRs collected/displayed. Distinguish no open PRs, no filter matches, and no recovered PRs with incomplete collection. Ensure partial reports remain visibly incomplete even when filtering hides affected records. Verify table output and stderr diagnostics independently. References: §§8, 9, 11.
+- [x] **T22 — Add table summaries and empty-result messages.** Show complete/incomplete repository totals and PRs collected/displayed. Distinguish no open PRs, no filter matches, and no recovered PRs with incomplete collection. Ensure partial reports remain visibly incomplete even when filtering hides affected records. Verify table output and stderr diagnostics independently. References: §§8, 9, 11.
+
+  Completed 2026-09-22: Added table summaries for repository completeness and collected/displayed PR counts, plus distinct empty-success, no-filter-match, and incomplete-recovery messages. Tests verify filtered partial output remains visibly incomplete. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T23 — Implement request timeouts and user cancellation.** Apply `--timeout` per request attempt using derived contexts. Handle `Ctrl+C` through a shared cancelable context, terminate subprocesses, and stop pending work and waits. Distinguish request timeout from user cancellation; cancellation exits 130 without requiring a report. Test a timed-out request, cancellation during execution, and cancellation of queued work. References: §§3, 8, 10, 11.
 
