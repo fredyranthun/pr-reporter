@@ -4,14 +4,27 @@ Relatório local de pull requests abertos no GitHub, incluindo rascunhos, coment
 
 ## Instalação
 
-Requer Linux (primeiro alvo), Go **1.25.0 ou mais recente** para compilar e [GitHub CLI (`gh`)](https://cli.github.com/) no `PATH`. O desenvolvimento foi validado com Go 1.25.1 em Linux/amd64 e `gh` **2.100.0**. Autentique-se manualmente antes de consultar repositórios:
+O binário publicado roda em **Linux/amd64** (inclusive WSL) e não exige Go. Para consultar repositórios, instale também o [GitHub CLI (`gh`)](https://cli.github.com/) e autentique-se em `github.com`:
 
 ```sh
 gh auth login --hostname github.com
 gh auth status --hostname github.com
 ```
 
-Clone o projeto e compile ou instale localmente:
+Instale o release mais recente com `curl`, `sh` e `sha256sum` (ou `shasum`):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | sh
+"$HOME/.local/bin/pr-report" --version
+```
+
+O script verifica o SHA-256 do binário contra `checksums.txt` do mesmo release e instala em `~/.local/bin/pr-report`. Se esse diretório não estiver no `PATH`, inclua-o no perfil do shell. Para escolher outro diretório ou fixar uma versão:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | INSTALL_DIR="$HOME/bin" PR_REPORT_VERSION=v0.1.0 sh
+```
+
+Para compilar a partir do código-fonte, é necessário Go **1.25.0 ou mais recente**:
 
 ```sh
 git clone https://github.com/fredyranthun/pr-reporter.git
@@ -21,22 +34,22 @@ go build -o pr-report ./cmd/pr-report
 # Alternativa: go install ./cmd/pr-report
 ```
 
-Para instalar a versão publicada:
+Também é possível instalar a versão publicada com Go:
 
 ```sh
 go install github.com/fredyranthun/pr-reporter/cmd/pr-report@latest
 ```
 
-`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.0](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.0) inclui o binário Linux/amd64, SHA-256 e instruções de verificação.
+`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.0](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.0) inclui o binário Linux/amd64 e seu checksum. O desenvolvimento foi validado com Go 1.25.1 e `gh` 2.100.0.
 
 ## Primeiro relatório
 
 ```sh
-./pr-report --repo minha-org/backend
-./pr-report --repo minha-org/backend --repo minha-org/frontend
-./pr-report --repos repos.txt --format json > prs.json
-./pr-report --repos repos.txt --only-unresolved
-./pr-report --repos repos.txt --concurrency 3 --timeout 45s
+pr-report --repo minha-org/backend
+pr-report --repo minha-org/backend --repo minha-org/frontend
+pr-report --repos repos.txt --format json > prs.json
+pr-report --repos repos.txt --only-unresolved
+pr-report --repos repos.txt --concurrency 3 --timeout 45s
 ```
 
 `repos.txt` é UTF-8, aceita BOM apenas no início, LF ou CRLF, um `owner/name` por linha, linhas vazias e comentários de linha inteira iniciados por `#` após espaços. Valores também podem vir de flags `--repo` repetidas; arquivo e flags são combinados e duplicatas são removidas sem diferenciar maiúsculas de minúsculas. URLs, caminhos locais, sufixos `.git` e comentários ao final da linha são inválidos. Toda a entrada é validada antes da primeira chamada à API.
@@ -83,5 +96,7 @@ GOPROXY=off GOTOOLCHAIN=local go test ./...
 GOPROXY=off GOTOOLCHAIN=local go test -race ./...
 go build -o pr-report ./cmd/pr-report
 ```
+
+Cada release futuro precisa publicar `pr-report-linux-amd64` e `checksums.txt` no formato gerado por `sha256sum pr-report-linux-amd64`; o instalador usa o release estável mais recente por padrão.
 
 [docs/acceptance-coverage.md](docs/acceptance-coverage.md) associa os 18 critérios de aceitação a testes. Para uma verificação autenticada opcional, execute `gh auth status --hostname github.com` e depois `./pr-report --repo owner/name --format json` em um repositório que você possa acessar. Confirme que stdout contém um objeto JSON e que `complete` e o código de saída refletem a coleta. A consulta usa a autenticação já configurada no `gh`; a ferramenta não abre login nem extrai tokens.

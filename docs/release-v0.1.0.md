@@ -4,7 +4,14 @@ First MVP release for Linux/amd64. It reports open GitHub pull requests, includi
 
 ## Install
 
-Download `pr-report-linux-amd64` from this release, verify its SHA-256 checksum below, mark it executable, and run it. Alternatively, with Go 1.25.0 or newer:
+On Linux/amd64, install the prebuilt binary without Go:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | PR_REPORT_VERSION=v0.1.0 sh
+"$HOME/.local/bin/pr-report" --version
+```
+
+The installer compares the binary with `checksums.txt` from this release and installs it to `~/.local/bin/pr-report` by default. You can also download `pr-report-linux-amd64` directly, verify its SHA-256 checksum below, mark it executable, and run it. Alternatively, with Go 1.25.0 or newer:
 
 ```sh
 go install github.com/fredyranthun/pr-reporter/cmd/pr-report@v0.1.0
@@ -19,7 +26,7 @@ SHA-256 `pr-report-linux-amd64`:
 f2cb17d9bbac166014540bfb3bec1b5b738b5185a31d5ec32b6b864d8cd29828
 ```
 
-The [README](https://github.com/fredyranthun/pr-reporter/blob/v0.1.0/README.md) explains flags, input, output, exit codes, and optional manual verification.
+The [README](https://github.com/fredyranthun/pr-reporter/blob/main/README.md) explains flags, input, output, exit codes, and optional manual verification.
 
 ## Known limits
 

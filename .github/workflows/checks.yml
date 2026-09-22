@@ -19,5 +19,7 @@ jobs:
         run: GOPROXY=off GOTOOLCHAIN=local go test ./...
       - name: Check concurrency races
         run: GOPROXY=off GOTOOLCHAIN=local go test -race ./...
+      - name: Check installer
+        run: bash scripts/test-install.sh
       - name: Build command
         run: GOPROXY=off GOTOOLCHAIN=local go build -o pr-report ./cmd/pr-report
