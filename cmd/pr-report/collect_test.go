@@ -33,3 +33,65 @@ func TestCollectMultipleRepositories(t *testing.T) {
 		}
 	}
 }
+
+func TestCompletenessAndCounters(t *testing.T) {
+	for _, scenario := range []string{"empty", "all fail", "unknown", "contradiction", "nullable", "missing detail", "partial listing complete details", "partial listing missing details", "duplicate incomplete wins"} {
+		t.Run(scenario, func(t *testing.T) {
+			p := prFixture(1)
+			f := &fakeExecutor{}
+			wantComplete := true
+			wantListing := true
+			wantDetails := true
+			wantCount := 1
+			wantErrors := 0
+			switch scenario {
+			case "empty":
+				wantCount = 0
+				f.replies = []processResult{listFixture([]any{}, false, nil)}
+			case "all fail":
+				wantCount = 0
+				wantComplete = false
+				wantListing = false
+				wantErrors = 1
+				f.replies = []processResult{{Stdout: []byte(`{"data":{"repository":null}}`)}}
+			case "unknown":
+				p["mergeStateStatus"] = "UNKNOWN"
+			case "contradiction":
+				p["isDraft"] = true
+			case "missing detail":
+				delete(p, "comments")
+				wantComplete = false
+				wantDetails = false
+				wantErrors = 1
+			case "partial listing complete details", "partial listing missing details":
+				wantComplete = false
+				wantListing = false
+				wantErrors = 1
+				if scenario == "partial listing missing details" {
+					delete(p, "author")
+					wantDetails = false
+					wantErrors++
+				}
+				f.replies = []processResult{listFixture([]any{p}, true, "a"), {Stdout: []byte(`{}`)}}
+			case "duplicate incomplete wins":
+				delete(p, "author")
+				duplicate := prFixture(1)
+				duplicate["mergeable"] = "FUTURE"
+				f.replies = []processResult{listFixture([]any{p}, true, "a"), listFixture([]any{duplicate}, false, nil)}
+				wantComplete = false
+				wantDetails = false
+				wantErrors = 1
+			}
+			if len(f.replies) == 0 {
+				f.replies = []processResult{listFixture([]any{p}, false, nil)}
+			}
+			r := newClient(f).collect(context.Background(), config{repos: []string{"Org/repo"}})
+			if r.Complete != wantComplete || r.Repositories[0].ListingComplete != wantListing || r.Repositories[0].DetailsComplete != wantDetails || r.PRsCollected != wantCount || r.PRsReturned != wantCount || r.Repositories[0].PRsCollected != wantCount || len(r.Errors) != wantErrors || len(r.Warnings) != 0 {
+				t.Fatalf("%+v", r)
+			}
+			if (r.Repositories[0].Repo == nil) != (scenario == "all fail") {
+				t.Fatal(r.Repositories)
+			}
+		})
+	}
+}
