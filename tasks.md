@@ -120,7 +120,9 @@ Depends on the report model and collection behavior above.
 
   Completed 2026-09-22: Validated all report exit paths for table and JSON: complete/blocked/empty 0, missing gh or output failure 1, input errors 2, all-repository failure 3, and cancellation 130. Structured context and stderr diagnostics remain separate from report output. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T26 — Complete the sequential command flow.** Wire validation, context setup, collection, normalization, filtering, rendering, and exit-code selection together. Ensure all input is validated before API work and errors from one repository do not stop independent repositories. Add offline end-to-end scenarios for default table output, JSON, multiple repositories, partial results, help/version, and filtered reports using the fake executor. References: §§3, 7–12.
+- [x] **T26 — Complete the sequential command flow.** Wire validation, context setup, collection, normalization, filtering, rendering, and exit-code selection together. Ensure all input is validated before API work and errors from one repository do not stop independent repositories. Add offline end-to-end scenarios for default table output, JSON, multiple repositories, partial results, help/version, and filtered reports using the fake executor. References: §§3, 7–12.
+
+  Completed 2026-09-22: Validated the complete sequential CLI using offline end-to-end scenarios for default table and JSON, combined/deduplicated sources, multiple repositories, thread details, partial results, filtering, and informational/invalid-input bypass. Verified offline `go test ./...`, formatting, and command build.
 
 ## Phase 5 — Concurrency, acceptance, and delivery (6 tasks)
 
