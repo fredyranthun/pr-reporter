@@ -7,6 +7,7 @@ import (
 )
 
 type client struct {
+	limit   chan struct{}
 	exec    executor
 	now     func() time.Time
 	timeout time.Duration

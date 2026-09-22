@@ -128,7 +128,9 @@ Depends on the report model and collection behavior above.
 
 Introduce concurrency after the sequential flow works. The flag is optional to use, but its implementation is part of the MVP.
 
-- [ ] **T27 — Add bounded global concurrency.** Honor `--concurrency` for independent repositories/detail requests while retaining sequential cursors within each connection. Share one global subprocess limit; do not multiply nested pools. Keep collection state race-free, scheduling cancelable, and report ordering stable. Retain sequential behavior at the default value of one. References: §§3, 7, 10.
+- [x] **T27 — Add bounded global concurrency.** Honor `--concurrency` for independent repositories/detail requests while retaining sequential cursors within each connection. Share one global subprocess limit; do not multiply nested pools. Keep collection state race-free, scheduling cancelable, and report ordering stable. Retain sequential behavior at the default value of one. References: §§3, 7, 10.
+
+  Completed 2026-09-22: Implemented bounded listing/detail worker phases with one global subprocess semaphore, cancelable scheduling, and deterministic result assembly. Tests demonstrate parallel requests without exceeding three active processes and stable repository/PR ordering; default execution remains sequential. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T28 — Validate concurrency and record development timings.** Use an instrumented fake executor to prove concurrency three never exceeds three active subprocesses, including retries and thread queries. Test one/eight bounds, concurrent partial failures, and cancellation without deadlock or leaked work. Run `go test -race ./...` in a compatible environment. Measure duration per repository during development without promising fixed latency or adding timing fields to the public schema. References: §§7, 10, 11.
 

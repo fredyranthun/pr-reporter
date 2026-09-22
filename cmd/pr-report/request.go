@@ -10,6 +10,17 @@ func (c *client) attempt(ctx context.Context, args ...string) processResult {
 	if err := ctx.Err(); err != nil {
 		return processResult{Err: err, ExitCode: -1}
 	}
+	if c.limit != nil {
+		select {
+		case <-ctx.Done():
+			return processResult{Err: ctx.Err(), ExitCode: -1}
+		case c.limit <- struct{}{}:
+		}
+		defer func() { <-c.limit }()
+	}
+	if err := ctx.Err(); err != nil {
+		return processResult{Err: err, ExitCode: -1}
+	}
 	attempt, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	r := c.exec.Execute(attempt, args...)
