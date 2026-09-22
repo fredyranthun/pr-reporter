@@ -59,7 +59,7 @@ func TestThreadFailurePreservesPRWithoutSubtotal(t *testing.T) {
 	for _, bad := range []processResult{
 		{Stdout: []byte(`{"data":{"repository":{"pullRequest":null}}}`)},
 		{Stdout: []byte(`{"data":{"repository":null},"errors":[{"type":"NOT_FOUND"}]}`)},
-		{Stdout: []byte(`{"data":{"repository":{"pullRequest":{"reviewThreads":{"nodes":[],"pageInfo":{"hasNextPage":false}}}}}},"errors":[{"message":"partial"}]}`)},
+		{Stdout: []byte(`{"data":{"repository":{"pullRequest":{"reviewThreads":{"nodes":[],"pageInfo":{"hasNextPage":false}}}}},"errors":[{"message":"partial"}]}`)},
 		threadFixture([]any{threadNode("new", false)}, true, "a"),
 		threadFixture([]any{threadNode("new", false)}, true, nil),
 		threadFixture([]any{map[string]any{"id": "bad"}}, false, nil),

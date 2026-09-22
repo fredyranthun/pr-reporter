@@ -68,7 +68,9 @@ Depends on reliable PR listing. Keep normalization separate from collection and 
 
   Completed 2026-09-22: Validated detail-failure recovery through the full collector. Fixtures prove unavailable PRs, malformed threads, mixed GraphQL errors, failed processes, and second-page cursor failures retain independent PR fields while discarding unresolved subtotals and emitting contextual errors. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T14 — Derive comment indicators.** Implement all three states of `has_comments`: true from either positive count, false only when both counts are known zero, otherwise null. Include bot/author comments and resolved threads; exclude text present only in a review body. Keep thread counts distinct from inline-message counts. Test the known/unknown count combinations and the review-body-only acceptance case. References: §§5, 11.
+- [x] **T14 — Derive comment indicators.** Implement all three states of `has_comments`: true from either positive count, false only when both counts are known zero, otherwise null. Include bot/author comments and resolved threads; exclude text present only in a review body. Keep thread counts distinct from inline-message counts. Test the known/unknown count combinations and the review-body-only acceptance case. References: §§5, 11.
+
+  Completed 2026-09-22: Implemented the three-state comment indicator from principal counts only. Tests cover all known/unknown combinations, resolved threads, review-body-only text, and later threads with an unavailable principal count; corrected a mixed-error thread fixture. Verified offline `go test ./...`, formatting, and command build.
 
 - [ ] **T15 — Implement conservative merge classification.** Apply §6 precedence for incomplete/contradictory data, drafts, conflicts, `BLOCKED`, `CLEAN` plus `MERGEABLE`, and unknown combinations. Detect the specified `CLEAN` contradictions, keep unresolved threads from independently establishing blockage, and preserve raw API values. Test the full decision table, legitimate null review decisions, and contradictory combinations. References: §§6, 11.
 
