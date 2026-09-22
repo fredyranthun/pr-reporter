@@ -9,7 +9,7 @@ import (
 	"os/signal"
 )
 
-var version = "dev"
+var version = "v0.1.0"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, executeReport))
