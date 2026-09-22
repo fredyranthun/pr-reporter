@@ -107,8 +107,9 @@ func TestInformationalFlagsWithoutGH(t *testing.T) {
 func TestValidConfigReachesExecutor(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	calls := 0
-	args := []string{"--repos=repos.txt", "--repo=org/one", "--repo=org/two", "--format=json", "--only-unresolved", "--concurrency=8", "--timeout=45s"}
-	want := config{reposFile: "repos.txt", repos: []string{"org/one", "org/two"}, format: "json", onlyUnresolved: true, concurrency: 8, timeout: 45 * time.Second}
+	file := writeRepositoryFile(t, "org/one\n")
+	args := []string{"--repos=" + file, "--repo=org/one", "--repo=org/two", "--format=json", "--only-unresolved", "--concurrency=8", "--timeout=45s"}
+	want := config{reposFile: file, repos: []string{"org/one", "org/two"}, format: "json", onlyUnresolved: true, concurrency: 8, timeout: 45 * time.Second}
 	code := run(args, &stdout, &stderr, func(got config, out, diagnostics io.Writer) int {
 		calls++
 		if !reflect.DeepEqual(got, want) {

@@ -80,6 +80,9 @@ func writeHelp(w io.Writer) error {
 	fs.SetOutput(&help)
 	fs.PrintDefaults()
 	help.WriteString("\nExamples:\n  pr-report --repo my-org/backend --repo my-org/frontend\n  pr-report --repos repos.txt --format json --concurrency 3 --timeout 45s\n")
+	help.WriteString("\nRepository files use UTF-8 (optional initial BOM), LF or CRLF, and one owner/name per line.\n")
+	help.WriteString("Blank lines and full-line # comments are ignored; surrounding whitespace is trimmed.\n")
+	help.WriteString("Duplicates are combined case-insensitively. URLs, paths, .git suffixes, and trailing comments are rejected.\n")
 	help.WriteString("\nComment counts exclude text present only in a review body.\nReview thread counts are not counts of individual inline messages.\n")
 	_, err := io.WriteString(w, help.String())
 	return err
