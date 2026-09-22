@@ -21,6 +21,9 @@ func (c *client) collect(ctx context.Context, cfg config) report {
 		r.Errors = append(r.Errors, errs...)
 		r.Complete = r.Complete && repo.ListingComplete && repo.DetailsComplete
 		for _, p := range prs {
+			signals, warnings := deriveSignals(p)
+			p.public.Signals = signals
+			r.Warnings = append(r.Warnings, warnings...)
 			r.PullRequests = append(r.PullRequests, p.public)
 		}
 	}

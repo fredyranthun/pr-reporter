@@ -130,3 +130,54 @@ func TestMergeMissingAndUnknownPrecedence(t *testing.T) {
 		t.Fatal("unresolved thread established blockage")
 	}
 }
+
+func TestSignalsAndCompatibilityWarnings(t *testing.T) {
+	for _, field := range []string{"mergeable", "mergeStateStatus", "reviewDecision"} {
+		for _, state := range []string{"DRAFT", "DIRTY", "BLOCKED", "CLEAN"} {
+			p := prFixture(1)
+			p["mergeStateStatus"] = state
+			p[field] = "NEW_VALUE"
+			f := &fakeExecutor{replies: []processResult{listFixture([]any{p}, false, nil)}}
+			r := newClient(f).collect(context.Background(), config{repos: []string{"org/repo"}})
+			if !r.Complete || !r.PullRequests[0].DetailsComplete || r.PullRequests[0].Blocked != nil || len(r.Warnings) != 1 || r.Warnings[0].Code != "unknown_enum" || *r.Warnings[0].PRNumber != 1 || *r.Warnings[0].Repo != "Org/Repo" {
+				t.Fatal(r)
+			}
+			found := false
+			for _, s := range r.PullRequests[0].Signals {
+				found = found || s == "merge_unknown"
+			}
+			if !found {
+				t.Fatal(r)
+			}
+		}
+	}
+	cases := map[string]string{"BEHIND": "behind", "BLOCKED": "merge_blocked", "DIRTY": "conflicts", "DRAFT": "draft", "HAS_HOOKS": "hooks_present", "UNKNOWN": "merge_unknown", "UNSTABLE": "nonpassing_status"}
+	for state, signal := range cases {
+		p := prFixture(1)
+		p["mergeStateStatus"] = state
+		r, _ := decodeList(listFixture([]any{p}, false, nil))
+		source := r.PRs.Value.Nodes.Value[0].Value
+		s, w := deriveSignals(collectedPR{source: source, public: publicPR("Org/Repo", source, newClient(nil).now())})
+		if len(s) != 1 || s[0] != signal || len(w) != 0 {
+			t.Fatal(state, s, w)
+		}
+	}
+	p := prFixture(1)
+	p["isDraft"] = true
+	p["mergeable"] = "CONFLICTING"
+	p["reviewDecision"] = "CHANGES_REQUESTED"
+	r, _ := decodeList(listFixture([]any{p}, false, nil))
+	source := r.PRs.Value.Nodes.Value[0].Value
+	out := publicPR("Org/Repo", source, newClient(nil).now())
+	out.UnresolvedThreadsCount = ptr(1)
+	s, _ := deriveSignals(collectedPR{source, out})
+	want := []string{"changes_requested", "conflicts", "draft", "inconsistent_merge_data", "unresolved_threads"}
+	if len(s) != len(want) {
+		t.Fatal(s)
+	}
+	for i := range want {
+		if s[i] != want[i] {
+			t.Fatal(s)
+		}
+	}
+}
