@@ -26,6 +26,7 @@ func publicPR(repo string, p apiPR, observed time.Time) pullRequest {
 	if out.ReviewThreadsCount != nil && *out.ReviewThreadsCount == 0 {
 		out.UnresolvedThreadsCount = ptr(0)
 	}
+	out.Blocked = classifyMerge(p)
 	out.HasComments = commentIndicator(out.ConversationCommentsCount, out.ReviewThreadsCount)
 	out.DetailsComplete = len(mainDetails(p)) == 0 && out.UnresolvedThreadsCount != nil
 	return out
