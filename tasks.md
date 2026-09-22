@@ -52,7 +52,9 @@ Depends on the foundation; deliver paginated collection and basic JSON before ad
 
   Completed 2026-09-22: Added sequential multi-repository collection with independent outcomes and UTC run/observation timestamps. Tests verify continuation after inaccessible repositories, canonical versus requested names, empty success, and identical PR numbers in different repositories. Verified offline `go test ./...`, formatting, and command build.
 
-- [ ] **T11 — Emit a basic JSON report for the first collection milestone.** Connect validated input, executor, listing, and models to a usable command. Emit one JSON object to stdout and diagnostics to stderr. Until thread collection is implemented, leave unknown details null and mark their incompleteness truthfully. Exercise a complete no-thread example and a partial-listing example through the command entry point. This is an intermediate milestone; T19 completes the JSON contract. References: §§9, 12.
+- [x] **T11 — Emit a basic JSON report for the first collection milestone.** Connect validated input, executor, listing, and models to a usable command. Emit one JSON object to stdout and diagnostics to stderr. Until thread collection is implemented, leave unknown details null and mark their incompleteness truthfully. Exercise a complete no-thread example and a partial-listing example through the command entry point. This is an intermediate milestone; T19 completes the JSON contract. References: §§9, 12.
+
+  Completed 2026-09-22: Connected validated command input to gh collection and indented JSON output with isolated diagnostics. Offline command tests cover complete no-thread and partial-listing reports; unavailable thread details remain null and incomplete until T12. Verified offline `go test ./...`, formatting, and command build.
 
 ## Phase 3 — Thread details and report semantics (8 tasks)
 

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -42,7 +43,32 @@ func run(args []string, stdout, stderr io.Writer, execute func(config, io.Writer
 	return 0
 }
 
-func executeReport(_ config, _ io.Writer, stderr io.Writer) int {
-	fmt.Fprintln(stderr, "pr-report: report collection is not implemented yet")
-	return 1
+func executeReport(cfg config, stdout, stderr io.Writer) int {
+	executor, err := locateGH()
+	if err != nil {
+		fmt.Fprintln(stderr, "pr-report: gh was not found in PATH")
+		return 1
+	}
+	return runReport(context.Background(), cfg, stdout, stderr, newClient(executor))
+}
+func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *client) int {
+	if cfg.format != "json" {
+		fmt.Fprintln(stderr, "pr-report: table rendering is not implemented yet; use --format json")
+		return 1
+	}
+	r := c.collect(ctx, cfg)
+	if ctx.Err() != nil {
+		return 130
+	}
+	for _, d := range r.Errors {
+		fmt.Fprintf(stderr, "pr-report: %s (%s): %q\n", d.Stage, d.Code, d.Message)
+	}
+	if err := writeJSON(stdout, r); err != nil {
+		fmt.Fprintf(stderr, "pr-report: write output: %v\n", err)
+		return 1
+	}
+	if !r.Complete {
+		return 3
+	}
+	return 0
 }
