@@ -1,0 +1,26 @@
+package main
+
+import "context"
+
+func (c *client) collect(ctx context.Context, cfg config) report {
+	r := newReport(c.now())
+	r.Filters.OnlyUnresolved = cfg.onlyUnresolved
+	r.Complete = true
+	for _, requested := range cfg.repos {
+		if ctx.Err() != nil {
+			r.Complete = false
+			break
+		}
+		repo, prs, errs := c.listPRs(ctx, requested)
+		r.Repositories = append(r.Repositories, repo)
+		r.Errors = append(r.Errors, errs...)
+		r.Complete = r.Complete && repo.ListingComplete && repo.DetailsComplete
+		for _, p := range prs {
+			r.PullRequests = append(r.PullRequests, p.public)
+		}
+	}
+	r.PRsCollected = len(r.PullRequests)
+	r.PRsReturned = r.PRsCollected
+	r.FinishedAt = c.now().UTC()
+	return r
+}
