@@ -34,7 +34,7 @@ func (c *client) countThreads(ctx context.Context, p pullRequest) (*int, *reques
 	count := 0
 	for ctx.Err() == nil {
 		args := append(queryArgs(threadQuery, p.Repo, cursor), "-F", "number="+strconv.Itoa(p.Number))
-		page, e := decodeThreads(c.exec.Execute(ctx, args...))
+		page, e := decodeThreads(c.attempt(ctx, args...))
 		if e != nil {
 			return nil, e
 		}

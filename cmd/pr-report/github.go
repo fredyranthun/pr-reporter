@@ -7,11 +7,12 @@ import (
 )
 
 type client struct {
-	exec executor
-	now  func() time.Time
+	exec    executor
+	now     func() time.Time
+	timeout time.Duration
 }
 
-func newClient(e executor) *client { return &client{exec: e, now: time.Now} }
+func newClient(e executor) *client { return &client{exec: e, now: time.Now, timeout: 30 * time.Second} }
 
 type collectedPR struct {
 	source apiPR
@@ -41,7 +42,7 @@ func (c *client) listPRs(ctx context.Context, requested string) (repositoryResul
 	numbers := map[int]string{}
 	fail := func(e *requestFailure) { errs = append(errs, e.diagnostic(ptr(requested), nil, "list_prs")) }
 	for ctx.Err() == nil {
-		raw := c.exec.Execute(ctx, queryArgs(listQuery, requested, cursor)...)
+		raw := c.attempt(ctx, queryArgs(listQuery, requested, cursor)...)
 		observed := c.now().UTC()
 		page, e := decodeList(raw)
 		if e != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 )
 
 var version = "dev"
@@ -49,10 +50,15 @@ func executeReport(cfg config, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "pr-report: gh was not found in PATH")
 		return 1
 	}
-	return runReport(context.Background(), cfg, stdout, stderr, newClient(executor))
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	return runReport(ctx, cfg, stdout, stderr, newClient(executor))
 }
 func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *client) int {
 
+	if cfg.timeout > 0 {
+		c.timeout = cfg.timeout
+	}
 	r := c.collect(ctx, cfg)
 	if ctx.Err() != nil {
 		return 130
