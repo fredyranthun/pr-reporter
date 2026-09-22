@@ -27,8 +27,7 @@ func (c *client) collect(ctx context.Context, cfg config) report {
 			r.PullRequests = append(r.PullRequests, p.public)
 		}
 	}
-	r.PRsCollected = len(r.PullRequests)
-	r.PRsReturned = r.PRsCollected
+	sortAndFilter(&r)
 	r.FinishedAt = c.now().UTC()
 	return r
 }
