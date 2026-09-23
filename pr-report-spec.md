@@ -59,6 +59,7 @@ pr-report --repos repos.txt --concurrency 3 --timeout 45s
 | `--repos <arquivo>` | Ausente | Lê um arquivo de repositórios |
 | `--repo <owner/name>` | Ausente | Pode ser repetida; combina com o arquivo |
 | `--format table\|json` | `table` | Define a saída |
+| `--fields <nomes>` | ausente | Seleciona campos dos PRs na tabela ou JSON, em ordem |
 | `--only-unresolved` | `false` | Filtra por discussões pendentes confirmadas |
 | `--concurrency <n>` | `1` | Inteiro entre 1 e 8; limite global de subprocessos `gh` |
 | `--timeout <duração>` | `30s` | Limite por tentativa de requisição; duração positiva |
@@ -220,6 +221,8 @@ Colunas: `REPO`, `PR`, `TÍTULO`, `COMENT.`, `THREADS PEND.`, `REVISÃO`, `MERGE
 
 Ordenar por repositório, sem diferenciar caixa, e número crescente. Remover sequências de controle, tabs e quebras de linha de campos exibidos no terminal. Títulos podem ser truncados a 60 runes com reticências; preservar o texto integral no JSON. Usar `text/tabwriter`, sem cores no MVP.
 
+Com `--fields`, a tabela mostra apenas as colunas escolhidas pelos nomes JSON dos campos de PR, na ordem informada. Sem a flag, mantém as nove colunas acima.
+
 Na tabela, incluir resumo de repositórios completos/incompletos e quantidade de PRs coletados/exibidos. Mensagens operacionais e erros vão para stderr. Para saída vazia, distinguir “nenhum PR aberto”, “nenhum PR atende ao filtro” e “nenhum PR recuperado; consulta incompleta”.
 
 ### JSON
@@ -273,6 +276,8 @@ Emitir exatamente um objeto válido em stdout, com indentação de dois espaços
 ```
 
 Cada erro contém `repo` (ou null), `pr_number` (ou null), `stage`, `code` e `message`. Estágios: `list_prs` ou `review_threads`. Códigos previstos no MVP: `auth`, `not_found_or_forbidden`, `timeout`, `network`, `api`, `invalid_response`. O código específico `rate_limit` fica para a etapa posterior. Avisos usam o mesmo contexto, com `code` e `message`, sem afetar automaticamente `complete`.
+
+A projeção opcional `--fields repo,number,title` limita apenas as propriedades de cada objeto em `pull_requests` e preserva sua ordem informada. O envelope de `schema_version: 1`, horários, filtros, repositórios, contadores, completude, erros e avisos continua presente. Sem `--fields`, cada PR mantém todos os campos do contrato acima. Com a flag, consumidores devem interpretar os objetos de PR como projeções explícitas do schema 1. Nomes válidos são exatamente os campos de PR listados neste contrato; campos vazios, repetidos ou desconhecidos são inválidos. A projeção não altera a consulta nem a classificação, apenas a apresentação.
 
 Em repositório não resolvido, `repo` será null e `requested_repo` preservará a entrada. Arrays vazios serão `[]`, não null. Campos opcionais serão explicitamente null. Mudanças incompatíveis exigem incremento de `schema_version`.
 

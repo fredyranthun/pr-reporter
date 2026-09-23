@@ -76,9 +76,9 @@ func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *cli
 			fmt.Fprintf(stderr, "pr-report: %q PR %s %s (%s): %q\n", repo, number, d.Stage, d.Code, d.Message)
 		}
 	}
-	render := writeTable
+	render := func(w io.Writer, r report) error { return writeTableFields(w, r, cfg.fields) }
 	if cfg.format == "json" {
-		render = writeJSON
+		render = func(w io.Writer, r report) error { return writeJSONFields(w, r, cfg.fields) }
 	}
 	if err := render(stdout, r); err != nil {
 		fmt.Fprintf(stderr, "pr-report: write output: %v\n", err)

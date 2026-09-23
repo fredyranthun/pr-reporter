@@ -48,6 +48,8 @@ go install github.com/fredyranthun/pr-reporter/cmd/pr-report@latest
 pr-report --repo minha-org/backend
 pr-report --repo minha-org/backend --repo minha-org/frontend
 pr-report --repos repos.txt --format json > prs.json
+pr-report --repo minha-org/backend --fields repo,number,title,url
+pr-report --repos repos.txt --format json --fields number,title,blocked > prs-resumidos.json
 pr-report --repos repos.txt --only-unresolved
 pr-report --repos repos.txt --concurrency 3 --timeout 45s
 ```
@@ -59,11 +61,14 @@ pr-report --repos repos.txt --concurrency 3 --timeout 45s
 | `--repos <arquivo>` | ausente | Lê uma lista TXT |
 | `--repo <owner/name>` | ausente | Adiciona repositório; pode repetir |
 | `--format table\|json` | `table` | Seleciona tabela ou JSON |
+| `--fields <nomes>` | todos no JSON; 9 colunas na tabela | Seleciona campos do PR, separados por vírgula, na ordem informada |
 | `--only-unresolved` | `false` | Exibe apenas PRs com pendências confirmadas |
 | `--concurrency <n>` | `1` | Limite global de processos `gh`, de 1 a 8 |
 | `--timeout <duração>` | `30s` | Prazo por tentativa de consulta |
 | `--help`, `-h` | — | Exibe ajuda sem consultar a API |
 | `--version` | — | Exibe versão sem consultar a API |
+
+`--fields` aceita os nomes dos campos de `pull_requests` no JSON: `repo`, `number`, `title`, `url`, `author`, `is_draft`, `created_at`, `updated_at`, `observed_at`, `conversation_comments_count`, `review_threads_count`, `unresolved_threads_count`, `has_comments`, `review_decision`, `mergeable`, `merge_state_status`, `blocked`, `signals` e `details_complete`. Espaços ao redor das vírgulas são aceitos; nomes são sensíveis a maiúsculas e minúsculas, sem aliases. Campos desconhecidos, vazios ou repetidos geram erro antes da consulta. A flag pode ser informada uma vez por comando. Na tabela, escolhe as colunas; no JSON, projeta apenas os campos de cada objeto em `pull_requests`. A coleta continua completa, e o JSON mantém metadados, contadores, repositórios, erros e avisos. Sem a flag, os formatos continuam iguais aos anteriores.
 
 A tabela mostra repositório, número, título, comentários gerais, threads pendentes, decisão de revisão, estado de merge, bloqueio e URL. `?` indica dado indisponível; `sim`, `não` e `?` são os estados de bloqueio. Títulos acima de 60 caracteres Unicode exibidos recebem reticências; a saída JSON mantém o título integral. O resumo mostra repositórios completos/incompletos e PRs coletados/exibidos.
 

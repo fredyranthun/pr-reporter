@@ -95,7 +95,7 @@ func TestInformationalFlagsWithoutGH(t *testing.T) {
 				}
 				return
 			}
-			for _, text := range []string{"Usage: pr-report", "-repos", "-repo", "-format", "-only-unresolved", "-concurrency", "-timeout", "-help", "-version", "default \"table\"", "default false", "default 1", "default 30s", "review body", "inline messages"} {
+			for _, text := range []string{"Usage: pr-report", "-repos", "-repo", "-format", "-fields", "-only-unresolved", "-concurrency", "-timeout", "-help", "-version", "default \"table\"", "default false", "default 1", "default 30s", "review body", "inline messages"} {
 				if !strings.Contains(stdout.String(), text) {
 					t.Errorf("help missing %q", text)
 				}

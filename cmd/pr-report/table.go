@@ -23,10 +23,29 @@ func displayBlocked(b *bool) string {
 	return "não"
 }
 func writeTable(w io.Writer, r report) error {
+	return writeTableFields(w, r, nil)
+}
+
+func writeTableFields(w io.Writer, r report, names []string) error {
+	if names == nil {
+		names = defaultTableFields
+	}
 	var b strings.Builder
-	b.WriteString("REPO\tPR\tTÍTULO\tCOMENT.\tTHREADS PEND.\tREVISÃO\tMERGE\tBLOQUEADO\tURL\n")
+	for i, name := range names {
+		if i > 0 {
+			b.WriteByte('\t')
+		}
+		b.WriteString(fieldByName(name).header)
+	}
+	b.WriteByte('\n')
 	for _, p := range r.PullRequests {
-		fmt.Fprintf(&b, "%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", terminalText(p.Repo), p.Number, tableTitle(p.Title), display(p.ConversationCommentsCount), display(p.UnresolvedThreadsCount), terminalText(display(p.ReviewDecision)), terminalText(display(p.MergeStateStatus)), displayBlocked(p.Blocked), terminalText(p.URL))
+		for i, name := range names {
+			if i > 0 {
+				b.WriteByte('\t')
+			}
+			b.WriteString(fieldByName(name).cell(p))
+		}
+		b.WriteByte('\n')
 	}
 	if len(r.PullRequests) == 0 {
 		switch {

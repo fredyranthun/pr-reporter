@@ -12,6 +12,7 @@ type config struct {
 	reposFile      string
 	repos          []string
 	format         string
+	fields         []string
 	onlyUnresolved bool
 	concurrency    int
 	timeout        time.Duration
@@ -38,6 +39,17 @@ func newFlagSet(cfg *config) *flag.FlagSet {
 		return nil
 	})
 	fs.StringVar(&cfg.format, "format", "table", "Output `format`: table or json")
+	fs.Func("fields", "Comma-separated pull request `fields` in display order (see list below)", func(value string) error {
+		if cfg.fields != nil {
+			return fmt.Errorf("--fields may only be specified once")
+		}
+		fields, err := parseFields(value)
+		if err != nil {
+			return err
+		}
+		cfg.fields = fields
+		return nil
+	})
 	fs.BoolVar(&cfg.onlyUnresolved, "only-unresolved", false, "Show only PRs with confirmed unresolved threads (default false)")
 	fs.IntVar(&cfg.concurrency, "concurrency", 1, "Global gh subprocess limit, from 1 to 8")
 	fs.DurationVar(&cfg.timeout, "timeout", 30*time.Second, "Positive request timeout per attempt")
@@ -79,7 +91,9 @@ func writeHelp(w io.Writer) error {
 	fs := newFlagSet(&config{})
 	fs.SetOutput(&help)
 	fs.PrintDefaults()
-	help.WriteString("\nExamples:\n  pr-report --repo my-org/backend --repo my-org/frontend\n  pr-report --repos repos.txt --format json --concurrency 3 --timeout 45s\n")
+	help.WriteString("\nAvailable --fields names: " + fieldNames() + "\n")
+	help.WriteString("--fields selects PR columns/properties in the given order; report metadata and diagnostics remain.\n")
+	help.WriteString("\nExamples:\n  pr-report --repo my-org/backend --repo my-org/frontend\n  pr-report --repo my-org/backend --fields repo,number,title,url\n  pr-report --repos repos.txt --format json --fields repo,number,title --concurrency 3 --timeout 45s\n")
 	help.WriteString("\nRepository files use UTF-8 (optional initial BOM), LF or CRLF, and one owner/name per line.\n")
 	help.WriteString("Blank lines and full-line # comments are ignored; surrounding whitespace is trimmed.\n")
 	help.WriteString("Duplicates are combined case-insensitively. URLs, paths, .git suffixes, and trailing comments are rejected.\n")
