@@ -18,10 +18,10 @@ curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scrip
 "$HOME/.local/bin/pr-report" --version
 ```
 
-O script verifica o SHA-256 do binário contra `checksums.txt` do mesmo release e instala em `~/.local/bin/pr-report`. Se esse diretório não estiver no `PATH`, inclua-o no perfil do shell. Para escolher outro diretório ou fixar uma versão:
+O script verifica o SHA-256 do binário contra `checksums.txt` do mesmo release e instala em `~/.local/bin/pr-report`. Execute o mesmo comando para atualizar uma instalação existente para o release mais recente. Se esse diretório não estiver no `PATH`, inclua-o no perfil do shell. Para escolher outro diretório ou fixar uma versão:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | INSTALL_DIR="$HOME/bin" PR_REPORT_VERSION=v0.1.0 sh
+curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | INSTALL_DIR="$HOME/bin" PR_REPORT_VERSION=v0.1.1 sh
 ```
 
 Para compilar a partir do código-fonte, é necessário Go **1.25.0 ou mais recente**:
@@ -40,7 +40,7 @@ Também é possível instalar a versão publicada com Go:
 go install github.com/fredyranthun/pr-reporter/cmd/pr-report@latest
 ```
 
-`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.0](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.0) inclui o binário Linux/amd64 e seu checksum. O desenvolvimento foi validado com Go 1.25.1 e `gh` 2.100.0.
+`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.1](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.1) inclui o binário Linux/amd64 e seu checksum. O desenvolvimento foi validado com Go 1.25.1 e `gh` 2.100.0.
 
 ## Primeiro relatório
 
