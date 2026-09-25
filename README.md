@@ -21,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scrip
 O script verifica o SHA-256 do binário contra `checksums.txt` do mesmo release e instala em `~/.local/bin/pr-report`. Execute o mesmo comando para atualizar uma instalação existente para o release mais recente. Se esse diretório não estiver no `PATH`, inclua-o no perfil do shell. Para escolher outro diretório ou fixar uma versão:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | INSTALL_DIR="$HOME/bin" PR_REPORT_VERSION=v0.1.1 sh
+curl -fsSL https://raw.githubusercontent.com/fredyranthun/pr-reporter/main/scripts/install.sh | INSTALL_DIR="$HOME/bin" PR_REPORT_VERSION=v0.1.2 sh
 ```
 
 Para compilar a partir do código-fonte, é necessário Go **1.25.0 ou mais recente**:
@@ -40,7 +40,7 @@ Também é possível instalar a versão publicada com Go:
 go install github.com/fredyranthun/pr-reporter/cmd/pr-report@latest
 ```
 
-`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.1](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.1) inclui o binário Linux/amd64 e seu checksum. O desenvolvimento foi validado com Go 1.25.1 e `gh` 2.100.0.
+`go install` coloca o executável em `GOBIN` ou, se não configurado, em `GOPATH/bin`; inclua esse diretório no `PATH`. O [release v0.1.2](https://github.com/fredyranthun/pr-reporter/releases/tag/v0.1.2) inclui o binário Linux/amd64 e seu checksum. O desenvolvimento foi validado com Go 1.25.1 e `gh` 2.100.0.
 
 ## Primeiro relatório
 
@@ -71,7 +71,7 @@ pr-report --repos repos.txt --concurrency 3 --timeout 45s
 
 `--fields` aceita os nomes dos campos de `pull_requests` no JSON: `repo`, `number`, `title`, `url`, `author`, `is_draft`, `created_at`, `updated_at`, `observed_at`, `conversation_comments_count`, `review_threads_count`, `unresolved_threads_count`, `has_comments`, `review_decision`, `mergeable`, `merge_state_status`, `blocked`, `signals` e `details_complete`. Espaços ao redor das vírgulas são aceitos; nomes são sensíveis a maiúsculas e minúsculas, sem aliases. Campos desconhecidos, vazios ou repetidos geram erro antes da consulta. A flag pode ser informada uma vez por comando. Na tabela, escolhe as colunas; no JSON, projeta apenas os campos de cada objeto em `pull_requests`; no chat, exibe linhas rotuladas na ordem pedida. A coleta continua completa, e o JSON mantém metadados, contadores, repositórios, erros e avisos. Sem a flag, os formatos continuam iguais aos anteriores.
 
-O formato `chat` gera texto pronto para copiar e colar em uma conversa ou thread do Slack ou Teams: resumo da coleta, PRs agrupados por repositório, símbolos de status e URLs completas clicáveis. Ele usa espaçamento e Unicode em vez de depender da interpretação de Markdown pelo editor; a aparência final pode variar conforme o cliente. `--fields` mantém somente os campos escolhidos de cada PR como linhas rotuladas, na ordem pedida, além do resumo da coleta. Dados ausentes aparecem como `?`; a saída avisa quando a coleta está incompleta. Para usar o recurso antes do próximo release, compile a versão atual da branch `main`; o instalador ainda entrega o v0.1.1.
+O formato `chat` gera texto pronto para copiar e colar em uma conversa ou thread do Slack ou Teams: resumo da coleta, PRs agrupados por repositório, símbolos de status e URLs completas clicáveis. Ele usa espaçamento e Unicode em vez de depender da interpretação de Markdown pelo editor; a aparência final pode variar conforme o cliente. `--fields` mantém somente os campos escolhidos de cada PR como linhas rotuladas, na ordem pedida, além do resumo da coleta. Dados ausentes aparecem como `?`; a saída avisa quando a coleta está incompleta. O instalador do release v0.1.2 inclui este formato sem exigir Go.
 
 A tabela mostra repositório, número, título, comentários gerais, threads pendentes, decisão de revisão, estado de merge, bloqueio e URL. `?` indica dado indisponível; `sim`, `não` e `?` são os estados de bloqueio. Títulos acima de 60 caracteres Unicode exibidos recebem reticências; a saída JSON mantém o título integral. O resumo mostra repositórios completos/incompletos e PRs coletados/exibidos.
 
