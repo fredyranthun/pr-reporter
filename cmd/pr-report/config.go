@@ -38,7 +38,7 @@ func newFlagSet(cfg *config) *flag.FlagSet {
 		cfg.repos = append(cfg.repos, value)
 		return nil
 	})
-	fs.StringVar(&cfg.format, "format", "table", "Output `format`: table or json")
+	fs.StringVar(&cfg.format, "format", "table", "Output `format`: table, json, or chat")
 	fs.Func("fields", "Comma-separated pull request `fields` in display order (see list below)", func(value string) error {
 		if cfg.fields != nil {
 			return fmt.Errorf("--fields may only be specified once")
@@ -68,8 +68,8 @@ func parseConfig(args []string) (config, error) {
 	if fs.NArg() != 0 {
 		return config{}, fmt.Errorf("positional arguments are not supported: %q", fs.Arg(0))
 	}
-	if cfg.format != "table" && cfg.format != "json" {
-		return config{}, fmt.Errorf("--format must be table or json")
+	if cfg.format != "table" && cfg.format != "json" && cfg.format != "chat" {
+		return config{}, fmt.Errorf("--format must be table, json, or chat")
 	}
 	if cfg.concurrency < 1 || cfg.concurrency > 8 {
 		return config{}, fmt.Errorf("--concurrency must be between 1 and 8")
@@ -93,7 +93,8 @@ func writeHelp(w io.Writer) error {
 	fs.PrintDefaults()
 	help.WriteString("\nAvailable --fields names: " + fieldNames() + "\n")
 	help.WriteString("--fields selects PR columns/properties in the given order; report metadata and diagnostics remain.\n")
-	help.WriteString("\nExamples:\n  pr-report --repo my-org/backend --repo my-org/frontend\n  pr-report --repo my-org/backend --fields repo,number,title,url\n  pr-report --repos repos.txt --format json --fields repo,number,title --concurrency 3 --timeout 45s\n")
+	help.WriteString("Chat output is designed for copying into Slack or Teams; --fields selects labeled lines per PR.\n")
+	help.WriteString("\nExamples:\n  pr-report --repo my-org/backend --repo my-org/frontend\n  pr-report --repo my-org/backend --format chat\n  pr-report --repo my-org/backend --format chat --fields repo,number,title,url\n  pr-report --repo my-org/backend --fields repo,number,title,url\n  pr-report --repos repos.txt --format json --fields repo,number,title --concurrency 3 --timeout 45s\n")
 	help.WriteString("\nRepository files use UTF-8 (optional initial BOM), LF or CRLF, and one owner/name per line.\n")
 	help.WriteString("Blank lines and full-line # comments are ignored; surrounding whitespace is trimmed.\n")
 	help.WriteString("Duplicates are combined case-insensitively. URLs, paths, .git suffixes, and trailing comments are rejected.\n")

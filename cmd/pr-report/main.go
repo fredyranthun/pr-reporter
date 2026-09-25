@@ -77,8 +77,11 @@ func runReport(ctx context.Context, cfg config, stdout, stderr io.Writer, c *cli
 		}
 	}
 	render := func(w io.Writer, r report) error { return writeTableFields(w, r, cfg.fields) }
-	if cfg.format == "json" {
+	switch cfg.format {
+	case "json":
 		render = func(w io.Writer, r report) error { return writeJSONFields(w, r, cfg.fields) }
+	case "chat":
+		render = func(w io.Writer, r report) error { return writeChatFields(w, r, cfg.fields) }
 	}
 	if err := render(stdout, r); err != nil {
 		fmt.Fprintf(stderr, "pr-report: write output: %v\n", err)
